@@ -65,6 +65,11 @@ export type T = {
   // LRC staleness warning
   lrcStaleWarning: string;
   lrcStaleDismiss: string;
+  // Translation panel
+  translation: string;
+  showTranslation: string;
+  hideTranslation: string;
+  noTranslation: string;
 };
 
 export const translations: Record<Lang, T> = {
@@ -124,6 +129,10 @@ export const translations: Record<Lang, T> = {
     removeChunkBoundary: 'Remove chunk boundary',
     lrcStaleWarning: 'LRC file has been modified. Chunk boundaries may be misaligned.',
     lrcStaleDismiss: 'Dismiss',
+    translation: 'Translation',
+    showTranslation: 'Show translation panel',
+    hideTranslation: 'Hide translation panel',
+    noTranslation: 'No translation yet. Double-click a chunk to add one.',
   },
   zh: {
     switchLang: 'English',
@@ -181,5 +190,9 @@ export const translations: Record<Lang, T> = {
     removeChunkBoundary: '取消段落分界',
     lrcStaleWarning: 'LRC 文件已被修改，段落分界可能错位。',
     lrcStaleDismiss: '忽略',
+    translation: '翻译',
+    showTranslation: '显示翻译面板',
+    hideTranslation: '隐藏翻译面板',
+    noTranslation: '还没有翻译。双击段落可添加。',
   },
 };

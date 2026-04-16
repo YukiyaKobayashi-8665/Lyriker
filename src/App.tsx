@@ -8,6 +8,7 @@ import Playlist from './components/Playlist';
 import PlayerBar from './components/PlayerBar';
 import LyricPanel from './components/LyricPanel';
 import StampEditor from './components/StampEditor';
+import TranslationPanel from './components/TranslationPanel';
 import { lsSaveTrack } from './utils/persist';
 import { useLang } from './LangContext';
 import { useLyriker } from './hooks/useLyriker';
@@ -42,7 +43,29 @@ function App() {
   // ── Lyriker sidecar (chunks, translations, notes) ────────────────────────
   // Wired here for M1.2+; destructure fields as milestones are built
   const lyriker = useLyriker(currentSong, dirHandle, lines);
-  const { chunks, toggleChunk, isStale, dismissStale } = lyriker;
+  const { chunks, toggleChunk, isStale, dismissStale, translations, setTranslation } = lyriker;
+
+  // ── Translation panel layout ─────────────────────────────
+  const [translationOpen, setTranslationOpen] = useState(false);
+  const [leftPct, setLeftPct] = useState(55);
+  const columnsRef = useRef<HTMLDivElement>(null);
+
+  const handleSplitterMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startPct = leftPct;
+    const containerWidth = columnsRef.current?.offsetWidth ?? 1;
+    const onMouseMove = (ev: MouseEvent) => {
+      const newPct = Math.min(80, Math.max(20, startPct + ((ev.clientX - startX) / containerWidth) * 100));
+      setLeftPct(newPct);
+    };
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }, [leftPct]);
 
   // ── Keyboard shortcuts ───────────────────────────────────
   const editingLyricRef = useRef(false);
@@ -148,33 +171,54 @@ function App() {
               onToggleChunk={toggleChunk}
             />
           ) : currentSong ? (
-            <>
-              {isStale && (
-                <div className="lrc-stale-banner">
-                  <span>{t.lrcStaleWarning}</span>
-                  <button className="lrc-stale-dismiss" onClick={dismissStale}>{t.lrcStaleDismiss} ×</button>
+            <div className="lyric-columns" ref={columnsRef}>
+              <div
+                className="lyric-column"
+                style={translationOpen ? { flex: `0 0 ${leftPct}%` } : undefined}
+              >
+                {isStale && (
+                  <div className="lrc-stale-banner">
+                    <span>{t.lrcStaleWarning}</span>
+                    <button className="lrc-stale-dismiss" onClick={dismissStale}>{t.lrcStaleDismiss} ×</button>
+                  </div>
+                )}
+                <div className="lyric-header">
+                  <button
+                    className="stamp-open-btn"
+                    onClick={() => setStampMode(true)}
+                    title={t.openStampEditor}
+                  >
+                    {t.stampBtn}
+                  </button>
                 </div>
-              )}
-              <div className="lyric-header">
-                <button
-                  className="stamp-open-btn"
-                  onClick={() => setStampMode(true)}
-                  title={t.openStampEditor}
-                >
-                  {t.stampBtn}
-                </button>
+                <LyricPanel
+                  lines={lines}
+                  activeIndex={activeIndex}
+                  hasLrc={hasLrc}
+                  chunks={chunks}
+                  onSeek={seek}
+                  updateLine={updateLine}
+                  onEditingChange={editing => { editingLyricRef.current = editing; }}
+                  onToggleChunk={toggleChunk}
+                />
               </div>
-              <LyricPanel
-                lines={lines}
-                activeIndex={activeIndex}
-                hasLrc={hasLrc}
+              {translationOpen && (
+                <div
+                  className="lyric-splitter"
+                  onMouseDown={handleSplitterMouseDown}
+                />
+              )}
+              <TranslationPanel
+                isOpen={translationOpen}
+                onToggle={() => setTranslationOpen(o => !o)}
                 chunks={chunks}
-                onSeek={seek}
-                updateLine={updateLine}
-                onEditingChange={editing => { editingLyricRef.current = editing; }}
-                onToggleChunk={toggleChunk}
+                translations={translations}
+                activeIndex={activeIndex}
+                lineCount={lines.length}
+                lines={lines}
+                onSetTranslation={setTranslation}
               />
-            </>
+            </div>
           ) : (
             <p className="lyric-placeholder">{t.selectSong}</p>
           )}

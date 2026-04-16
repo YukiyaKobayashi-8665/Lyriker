@@ -6,7 +6,7 @@ import { hashLrcLines } from '../utils/hash';
 
 export const EMPTY_LYRIKER: LyrikerData = {
   lrcHash: '',
-  chunks: [],
+  chunks: [0],
   translations: {},
   notes: {},
 };
@@ -65,9 +65,10 @@ export function useLyriker(
         const parsed = JSON.parse(await file.text()) as Partial<LyrikerData>;
         if (cancelled) return;
 
+        const rawChunks: number[] = Array.isArray(parsed.chunks) ? parsed.chunks : [];
         const loaded: LyrikerData = {
           lrcHash:      parsed.lrcHash      ?? '',
-          chunks:       Array.isArray(parsed.chunks) ? parsed.chunks : [],
+          chunks:       rawChunks.includes(0) ? rawChunks : [0, ...rawChunks].sort((a, b) => a - b),
           translations: parsed.translations ?? {},
           notes:        parsed.notes        ?? {},
         };
@@ -140,6 +141,7 @@ export function useLyriker(
 
   /** Toggle a line index as a chunk boundary. */
   const toggleChunk = useCallback((lineIndex: number) => {
+    if (lineIndex === 0) return; // chunk 0 is always the implicit song start
     const prev = dataRef.current;
     const chunks = prev.chunks.includes(lineIndex)
       ? prev.chunks.filter(i => i !== lineIndex)

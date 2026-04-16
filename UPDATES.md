@@ -2,32 +2,20 @@
 
 ---
 
-## v0.1.1 — Chunking Infrastructure (M1)
+## v0.1.2 — Translation panel fixes
 
-### M1.1 — Chunk data & persistence
-- Added `useLyriker` hook that loads and saves a `<song>.lyriker.json` sidecar file per song.
-- Sidecar stores chunk boundaries (`chunks`), translations, notes, and an LRC content hash (`lrcHash`).
-- Changes are auto-saved with a 400 ms debounce via the File System Access API.
-- File is created lazily on first mutation; no empty files are written.
+- **Chunk 0 always set:** Line 0 is now always a chunk start by default; `toggleChunk(0)` is a no-op. Existing sidecars missing index 0 are upgraded on load.
+- **Translation placeholder:** Empty chunks now show the first lyric line of the chunk as placeholder text instead of `[N–M]` line numbers.
+- **Placeholder visibility:** Placeholder opacity raised so it's readable but still distinguishable from real translations.
+- **Stamp save corruption fix:** Unstamped lines are now written as bare text (no `[00:00.00]` tag) so they don't corrupt LRC sort order. On reload, mixed stamped/plain lines resume correctly as `time: null`.
 
-### M1.2 — Chunk editing in normal lyric panel
-- Each lyric line shows a `⊕`/`⊖` button in the left gutter on hover to set or clear a chunk boundary.
-- Lines marked as chunk starts receive a blank-space gap above them (no divider line).
-- Chunk boundaries are persisted immediately to the sidecar JSON.
+---
 
-### M1.3 — Chunk-aware lyrics display
-- Lyric lines are grouped into chunks during playback.
-- Lines in the active chunk are shown at full size and opacity; lines in inactive chunks are smaller and dimmed, with smooth CSS transitions.
-- Auto-scroll centers the entire active chunk in the lyric panel (not just the active line).
+## v0.1.1 — Chunking & translation panel (M1 + M2)
 
-### M1.4 — Chunking in stamp mode
-- Stamp mode now displays `⊕`/`⊖` buttons on each line (visible on hover, right-aligned in the row).
-- Keyboard shortcut `C` toggles a chunk boundary on the focused line.
-- Lines marked as chunk starts show a top gap in the stamp list.
-- The `+Gap` button and `G` shortcut have been removed; chunking covers the same structural purpose.
-
-### M1.5 — LRC modification warning
-- On load, the LRC content hash is compared against the stored hash in the sidecar.
-- If a mismatch is detected, an amber warning banner appears above the lyric panel: *"LRC file has been modified. Chunk boundaries may be misaligned."*
-- The banner has a Dismiss button that hides it for the current session.
-- Available in both English and Chinese (i18n).
+- `useLyriker` hook — loads/saves `<song>.lyriker.json` sidecar (chunks, translations, notes, LRC hash). Auto-saved with 400 ms debounce; created lazily on first mutation.
+- Chunk toggle buttons (`⊕`/`⊖`) in lyric panel and stamp mode; keyboard shortcut `C` in stamp mode.
+- Chunk-aware display: active chunk at full opacity/size, others dimmed; auto-scroll centers active chunk.
+- LRC staleness banner when stored hash mismatches current file.
+- Two-column layout with foldable translation panel and draggable splitter.
+- Translation panel: chunk-aligned display, auto-scroll, double-click to edit (commit with Ctrl+Enter or Escape).

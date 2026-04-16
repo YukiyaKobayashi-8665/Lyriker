@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState, type FC } from 'react';
 import type { Song } from '../types';
-import { parseLrc, serializeLrc } from '../utils/parseLrc';
+import { parseLrc } from '../utils/parseLrc';
 import { useStampSession, validateLines, type StampLine } from '../hooks/useStampSession';
 import { useLang } from '../LangContext';
 
@@ -109,9 +109,9 @@ const StampEditor: FC<Props> = ({ song, dirHandle, currentTime, duration, chunks
         .then(async f => {
           if (cancelled) return;
           const raw = await f.text();
-          const { lines: parsed, metadata } = parseLrc(raw);
+          const { metadata } = parseLrc(raw);
           metadataRef.current = metadata;
-          session.initFromExisting(parsed);
+          session.initFromRaw(raw);
         })
         .catch(() => { if (!cancelled) session.initEmpty(); });
     } else {
@@ -155,8 +155,17 @@ const StampEditor: FC<Props> = ({ song, dirHandle, currentTime, duration, chunks
         setSaving(false);
         return;
       }
-      const lrcLines = session.lines.map(l => ({ time: l.time ?? 0, text: l.text }));
-      const content = serializeLrc(lrcLines, metadataRef.current);
+      // Stamped lines → [mm:ss.xx]text; unstamped → bare text (preserved in file, ignored by players)
+      const meta = Object.entries(metadataRef.current).map(([k, v]) => `[${k}:${v}]`).join('\n');
+      const lyricLines = session.lines.map(l => {
+        if (l.time === null) return l.text;
+        const totalSec = Math.floor(l.time);
+        const ms = Math.round((l.time - totalSec) * 100);
+        const min = Math.floor(totalSec / 60);
+        const sec = totalSec % 60;
+        return `[${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}.${String(ms).padStart(2, '0')}]${l.text}`;
+      }).join('\n');
+      const content = meta ? `${meta}\n${lyricLines}` : lyricLines;
       const handle = await dirHandle.getFileHandle(fileName, { create: true });
       const writable = await handle.createWritable();
       await writable.write(content);

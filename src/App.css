@@ -40,6 +40,182 @@
   flex-direction: column;
 }
 
+.lyric-area {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Two-column lyrics / translation layout ──── */
+.lyric-columns {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.lyric-column {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+
+.lyric-splitter {
+  width: 3px;
+  flex-shrink: 0;
+  background: #222;
+  cursor: col-resize;
+  transition: background 0.15s;
+  position: relative;
+  z-index: 1;
+}
+.lyric-splitter:hover,
+.lyric-splitter:active {
+  background: #4a9eff;
+}
+
+/* ── Translation column ──────────────────────── */
+.translation-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: 1px solid #222;
+  min-width: 0;
+}
+
+.translation-column--folded {
+  flex: 0 0 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 6px;
+  border-left: 1px solid #222;
+  background: #141414;
+}
+
+.translation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 12px;
+  background: #161616;
+  border-bottom: 1px solid #222;
+  flex-shrink: 0;
+}
+
+.translation-title {
+  font-size: 11px;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.translation-fold-btn {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 1px 4px;
+  border-radius: 3px;
+  transition: color 0.12s;
+}
+.translation-fold-btn:hover { color: #ccc; }
+
+.translation-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.translation-pad {
+  height: 50%;
+}
+
+.translation-chunk {
+  padding: 10px 18px;
+  transition: opacity 0.3s, font-size 0.3s;
+  text-align: center;
+  line-height: 1.65;
+}
+
+.translation-chunk--active {
+  opacity: 1;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.translation-chunk--inactive {
+  opacity: 0.35;
+  font-size: 12px;
+  color: #888;
+}
+
+.translation-chunk--inactive:hover {
+  opacity: 0.7;
+}
+
+.translation-chunk--editing {
+  opacity: 1;
+  background: #1a2535;
+  border-radius: 6px;
+}
+
+.translation-edit-area {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e8e8e8;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.65;
+  resize: none;
+  caret-color: #4a9eff;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.translation-line {
+  margin: 0 0 2px;
+}
+
+.translation-placeholder {
+  margin: 0;
+  color: #555;
+  font-size: 11px;
+  font-style: italic;
+}
+
+.translation-empty-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: #444;
+  font-size: 13px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.translation-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 24px;
+  color: #444;
+  font-size: 13px;
+  text-align: center;
+  line-height: 1.6;
+}
+
 /* ── Folder Picker ───────────────────────────── */
 .folder-picker {
   padding: 10px 12px;
