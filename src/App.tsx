@@ -10,6 +10,7 @@ import LyricPanel from './components/LyricPanel';
 import StampEditor from './components/StampEditor';
 import { lsSaveTrack } from './utils/persist';
 import { useLang } from './LangContext';
+import { useLyriker } from './hooks/useLyriker';
 import './App.css';
 
 function App() {
@@ -37,6 +38,11 @@ function App() {
   const { state: audioState, togglePlay, seek, setVolume, toggleMute, setSpeed } =
     useAudio(currentSong, onEnded);
   const { lines, activeIndex, hasLrc, updateLine } = useLyrics(currentSong, audioState.currentTime);
+
+  // ── Lyriker sidecar (chunks, translations, notes) ────────────────────────
+  // Wired here for M1.2+; destructure fields as milestones are built
+  const lyriker = useLyriker(currentSong, dirHandle, lines);
+  const { chunks, toggleChunk, isStale, dismissStale } = lyriker;
 
   // ── Keyboard shortcuts ───────────────────────────────────
   const editingLyricRef = useRef(false);
@@ -133,14 +139,22 @@ function App() {
               dirHandle={dirHandle}
               currentTime={audioState.currentTime}
               duration={audioState.duration}
+              chunks={chunks}
               onClose={() => setStampMode(false)}
               onSaved={handle => {
                 attachLrcHandle(currentIndex, handle);
                 setStampMode(false);
               }}
+              onToggleChunk={toggleChunk}
             />
           ) : currentSong ? (
             <>
+              {isStale && (
+                <div className="lrc-stale-banner">
+                  <span>{t.lrcStaleWarning}</span>
+                  <button className="lrc-stale-dismiss" onClick={dismissStale}>{t.lrcStaleDismiss} ×</button>
+                </div>
+              )}
               <div className="lyric-header">
                 <button
                   className="stamp-open-btn"
@@ -154,9 +168,11 @@ function App() {
                 lines={lines}
                 activeIndex={activeIndex}
                 hasLrc={hasLrc}
+                chunks={chunks}
                 onSeek={seek}
                 updateLine={updateLine}
                 onEditingChange={editing => { editingLyricRef.current = editing; }}
+                onToggleChunk={toggleChunk}
               />
             </>
           ) : (

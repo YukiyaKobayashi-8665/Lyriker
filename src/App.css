@@ -372,20 +372,68 @@
 }
 
 .lyric-line {
+  position: relative;
   padding: 9px 12px;
   border-radius: 6px;
   font-size: 15px;
   line-height: 1.6;
   color: #555;
   cursor: pointer;
-  transition: color 0.2s, background 0.15s;
+  transition: color 0.3s, background 0.15s, font-size 0.3s, opacity 0.3s;
   text-align: center;
+}
+
+/* Inactive chunk lines: smaller and more dimmed */
+.lyric-line--inactive {
+  font-size: 13px;
+  color: #3a3a3a;
+  opacity: 0.6;
+}
+
+.lyric-line--inactive:hover {
+  opacity: 1;
+  color: #888;
 }
 
 .lyric-line:hover {
   background: #1e1e1e;
   color: #aaa;
 }
+
+/* Chunk start — blank space above the first line of each chunk */
+.lyric-chunk-start {
+  margin-top: 28px;
+}
+
+/* Chunk toggle button — appears on line hover */
+.chunk-toggle-btn {
+  position: absolute;
+  left: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #444;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.lyric-line:hover .chunk-toggle-btn {
+  opacity: 1;
+}
+
+.chunk-toggle-btn:hover {
+  color: #4a9eff;
+}
+
+.chunk-toggle-btn--active {
+  color: #4a9eff;
+}
+
 
 .lyric-active {
   color: #ffffff;
@@ -480,6 +528,35 @@
   background: #243850;
 }
 
+/* ── LRC staleness warning banner ────────────────────────── */
+.lrc-stale-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 14px;
+  background: #2a2200;
+  border-bottom: 1px solid #665500;
+  color: #d4a800;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.lrc-stale-dismiss {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid #665500;
+  border-radius: 3px;
+  color: #d4a800;
+  font-size: 11px;
+  padding: 1px 7px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.lrc-stale-dismiss:hover {
+  background: #3a3000;
+}
+
 /* ── Lyric panel header (Stamp button) ───────────────────── */
 .lyric-header {
   display: flex;
@@ -561,7 +638,6 @@
 .stamp-btn-primary:hover:not(:disabled) { background: #265fc0; }
 .stamp-btn-primary:disabled { opacity: 0.35; cursor: default; }
 
-.stamp-gap-btn,
 .stamp-undo-btn {
   padding: 4px 10px;
   background: #1e1e1e;
@@ -572,7 +648,6 @@
   cursor: pointer;
   transition: background 0.12s, color 0.12s;
 }
-.stamp-gap-btn:hover { background: #1c2e1e; color: #90d090; }
 .stamp-undo-btn:hover:not(:disabled) { background: #2e2a1e; color: #d0b870; }
 .stamp-undo-btn:disabled { opacity: 0.3; cursor: default; }
 
@@ -653,8 +728,22 @@
   transition: background 0.1s;
   font-size: 14px;
   line-height: 1.5;
+  position: relative;
 }
 .stamp-line:hover { background: #1a1a1a; }
+
+/* Chunk gap above chunk-start lines in stamp mode */
+.stamp-chunk-start { margin-top: 16px; }
+
+/* Chunk toggle button visibility in stamp mode */
+.stamp-line .chunk-toggle-btn {
+  position: static;
+  transform: none;
+  margin-left: auto;
+  flex-shrink: 0;
+  opacity: 0;
+}
+.stamp-line:hover .chunk-toggle-btn { opacity: 1; }
 
 .stamp-focused {
   background: #131e2e;

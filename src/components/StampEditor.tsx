@@ -11,8 +11,10 @@ type Props = {
   dirHandle: FileSystemDirectoryHandle;
   currentTime: number;
   duration: number;
+  chunks?: number[];
   onClose: () => void;
   onSaved: (handle: FileSystemFileHandle) => void;
+  onToggleChunk?: (lineIndex: number) => void;
 };
 
 // ── Utility ───────────────────────────────────────────────────────────────────
@@ -34,10 +36,12 @@ type LineProps = {
   isPlaying: boolean;
   isIllegal: boolean;
   isWarning: boolean;
+  isChunkStart: boolean;
   onClick: () => void;
+  onToggleChunk?: () => void;
 };
 
-const StampLineItem: FC<LineProps> = ({ line, index, isFocused, isPlaying, isIllegal, isWarning, onClick }) => {
+const StampLineItem: FC<LineProps> = ({ line, index, isFocused, isPlaying, isIllegal, isWarning, isChunkStart, onClick, onToggleChunk }) => {
   const { t } = useLang();
   return (
     <div
@@ -50,6 +54,7 @@ const StampLineItem: FC<LineProps> = ({ line, index, isFocused, isPlaying, isIll
         isIllegal ? 'stamp-illegal' : '',
         isWarning && !isIllegal ? 'stamp-warning' : '',
         line.text === '' ? 'stamp-gap-line' : '',
+        isChunkStart ? 'stamp-chunk-start' : '',
       ].filter(Boolean).join(' ')}
       onClick={onClick}
     >
@@ -57,6 +62,16 @@ const StampLineItem: FC<LineProps> = ({ line, index, isFocused, isPlaying, isIll
       <span className="stamp-line-text">
         {line.text || <em className="stamp-gap-label">{t.instrumental}</em>}
       </span>
+      {onToggleChunk && (
+        <button
+          className={`chunk-toggle-btn${isChunkStart ? ' chunk-toggle-btn--active' : ''}`}
+          title={isChunkStart ? t.removeChunkBoundary : t.addChunkBoundary}
+          onClick={e => { e.stopPropagation(); onToggleChunk(); }}
+          tabIndex={-1}
+        >
+          {isChunkStart ? '⊖' : '⊕'}
+        </button>
+      )}
       {isFocused && <span className="stamp-focus-arrow" aria-hidden>▶</span>}
       {isIllegal && <span className="stamp-illegal-icon" title={t.illegalTimestamp}>!</span>}
       {isWarning && !isIllegal && <span className="stamp-warning-icon" title={t.beyondDuration}>⚠</span>}
@@ -66,7 +81,7 @@ const StampLineItem: FC<LineProps> = ({ line, index, isFocused, isPlaying, isIll
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-const StampEditor: FC<Props> = ({ song, dirHandle, currentTime, duration, onClose, onSaved }) => {
+const StampEditor: FC<Props> = ({ song, dirHandle, currentTime, duration, chunks, onClose, onSaved, onToggleChunk }) => {
   const { t } = useLang();
   const session = useStampSession();
   const metadataRef = useRef<Record<string, string>>({});
@@ -184,9 +199,9 @@ const StampEditor: FC<Props> = ({ song, dirHandle, currentTime, duration, onClos
       if (e.code === 'Enter' && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         if (s.focusIndex < s.lines.length) s.stamp(s.focusIndex, currentTimeRef.current);
-      } else if (e.code === 'KeyG' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      } else if (e.code === 'KeyC' && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
-        s.addGap(currentTimeRef.current, playingIndexRef.current);
+        if (onToggleChunk && s.focusIndex < s.lines.length) onToggleChunk(s.focusIndex);
       } else if (e.code === 'KeyZ' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         s.undo();
@@ -261,13 +276,6 @@ const StampEditor: FC<Props> = ({ song, dirHandle, currentTime, duration, onClos
         </span>
         <div className="stamp-toolbar-right">
           <button
-            className="stamp-gap-btn"
-            onClick={() => session.addGap(currentTimeRef.current, playingIndexRef.current)}
-            title={t.gapAfterTitle}
-          >
-            {t.gapAfter}
-          </button>
-          <button
             className="stamp-undo-btn"
             onClick={session.undo}
             disabled={session.historyLength === 0}
@@ -289,7 +297,7 @@ const StampEditor: FC<Props> = ({ song, dirHandle, currentTime, duration, onClos
       <div className="stamp-hint">
         {t.stampHintClick} &nbsp;·&nbsp;
         <kbd>Enter</kbd> {t.stampHintEnter} &nbsp;·&nbsp;
-        <kbd>G</kbd> {t.stampHintG} &nbsp;·&nbsp;
+        <kbd>C</kbd> {t.stampHintC} &nbsp;·&nbsp;
         <kbd>Ctrl+Z</kbd> {t.stampHintUndo} &nbsp;·&nbsp;
         <kbd>Ctrl+S</kbd> {t.stampHintSave} &nbsp;·&nbsp;
         {t.usePlaybar}
@@ -305,7 +313,9 @@ const StampEditor: FC<Props> = ({ song, dirHandle, currentTime, duration, onClos
             isPlaying={i === playingIndex}
             isIllegal={illegal.has(i)}
             isWarning={warning.has(i)}
+            isChunkStart={!!(chunks?.includes(i))}
             onClick={() => session.stamp(i, currentTimeRef.current)}
+            onToggleChunk={onToggleChunk ? () => onToggleChunk(i) : undefined}
           />
         ))}
         {allStamped && session.lines.length > 0 && (
