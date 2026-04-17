@@ -2,6 +2,18 @@
 
 ---
 
+## v0.1.3 — Notes panel, UX & bug fixes
+
+- **M3.1–M3.3 — Notes panel:** Notes section added below translations in the right column. Shows notes for the active chunk; auto-follows playback. Edit mode via double-click anywhere on the panel (rich text: Ctrl+B bold, Ctrl+I italic). Commit with Ctrl+Enter or Escape. While editing and playback moves on, a "Return to current playback" button appears.
+- **Notes fold:** Notes section folds to a header bar at the bottom of the right column; draggable vertical splitter between translation and notes hides when notes are folded.
+- **Right column open by default:** Translation/notes panel now starts expanded.
+- **Foldable sidebar:** `‹` button added to the right of the folder picker folds the sidebar to a narrow strip; `›` restores it.
+- **Dynamic translation textarea rows:** Edit area grows/shrinks immediately as lines are typed (`max(5, line_count)`).
+- **Scroll-center fix during splitter drag:** Active translation chunk stays centered in the translation body while dragging the vertical splitter.
+- **Pause scroll fix:** Auto-scroll back to active lyric no longer fires when playback is paused. Follow mode resumes automatically when playback restarts.
+
+---
+
 ## v0.1.2 — Translation panel fixes
 
 - **Chunk 0 always set:** Line 0 is now always a chunk start by default; `toggleChunk(0)` is a no-op. Existing sidecars missing index 0 are upgraded on load.

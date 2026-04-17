@@ -2,25 +2,34 @@ import { useRef, useEffect, useMemo, useState, useCallback, type FC } from 'reac
 import { useLang } from '../LangContext';
 import { getChunkRanges } from '../utils/chunkRanges';
 import type { LyricLine } from '../types';
+import NotesPanel from './NotesPanel';
 
 type Props = {
   isOpen: boolean;
   onToggle: () => void;
   chunks: number[];
   translations: Record<string, string>;
+  notes: Record<string, string>;
   activeIndex: number;
   lineCount: number;
   lines: LyricLine[];
   onSetTranslation: (chunkStart: number, text: string) => void;
+  onSetNotes: (chunkStart: number, text: string) => void;
 };
 
 const TranslationPanel: FC<Props> = ({
-  isOpen, onToggle, chunks, translations, activeIndex, lineCount, lines, onSetTranslation,
+  isOpen, onToggle, chunks, translations, notes, activeIndex, lineCount, lines,
+  onSetTranslation, onSetNotes,
 }) => {
   const { t } = useLang();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const columnRef = useRef<HTMLDivElement>(null);
   const [editingChunkStart, setEditingChunkStart] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // Vertical split: translation area takes topPct% of the column height
+  const [topPct, setTopPct] = useState(70);
+  const [notesOpen, setNotesOpen] = useState(true);
 
   const ranges = useMemo(
     () => getChunkRanges(chunks, lineCount),
@@ -36,8 +45,8 @@ const TranslationPanel: FC<Props> = ({
     return ranges[ranges.length - 1].start;
   }, [ranges, activeIndex]);
 
-  // Auto-scroll active chunk block into center — suppressed while editing
-  useEffect(() => {
+  // Scroll the active chunk to center of the translation body
+  const scrollToActive = useCallback((smooth: boolean) => {
     if (!scrollRef.current || activeChunkStart < 0 || editingChunkStart !== null) return;
     const el = scrollRef.current.querySelector<HTMLElement>(
       `[data-chunk-start="${activeChunkStart}"]`,
@@ -45,14 +54,20 @@ const TranslationPanel: FC<Props> = ({
     if (!el) return;
     const container = scrollRef.current;
     const target = el.offsetTop - container.clientHeight / 2 + el.offsetHeight / 2;
-    container.scrollTo({ top: target, behavior: 'smooth' });
+    container.scrollTo({ top: target, behavior: smooth ? 'smooth' : 'instant' });
   }, [activeChunkStart, editingChunkStart]);
+
+  // Auto-scroll active chunk block into center — suppressed while editing
+  useEffect(() => {
+    scrollToActive(true);
+  }, [scrollToActive]);
 
   // Focus textarea when entering edit mode
   useEffect(() => {
     if (editingChunkStart === null) return;
     const ta = textareaRef.current;
     if (!ta) return;
+    setEditingText(ta.value);
     ta.focus();
     ta.setSelectionRange(ta.value.length, ta.value.length);
   }, [editingChunkStart]);
@@ -69,6 +84,25 @@ const TranslationPanel: FC<Props> = ({
       commitEdit();
     }
   }, [commitEdit]);
+
+  const handleVSplitterMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const startY = e.clientY;
+    const startPct = topPct;
+    const colHeight = columnRef.current?.offsetHeight ?? 1;
+    const onMove = (ev: MouseEvent) => {
+      const newPct = Math.min(85, Math.max(15, startPct + ((ev.clientY - startY) / colHeight) * 100));
+      setTopPct(newPct);
+      // Re-center immediately after layout update
+      requestAnimationFrame(() => scrollToActive(false));
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  }, [topPct, scrollToActive]);
 
   if (!isOpen) {
     return (
@@ -87,7 +121,7 @@ const TranslationPanel: FC<Props> = ({
   const hasAnyTranslation = Object.values(translations).some(v => v.trim() !== '');
 
   return (
-    <div className="translation-column">
+    <div className="translation-column" ref={columnRef}>
       <div className="translation-header">
         <span className="translation-title">{t.translation}</span>
         <button
@@ -98,7 +132,8 @@ const TranslationPanel: FC<Props> = ({
           ›
         </button>
       </div>
-      <div className="translation-body" ref={scrollRef}>
+      {/* Translation body — expands to fill when notes folded */}
+      <div className="translation-body" ref={scrollRef} style={{ flex: notesOpen ? `0 0 ${topPct}%` : '1' }}>
         <div className="translation-pad" />
         {ranges.map(({ start, end }) => {
           const text = translations[String(start)] ?? '';
@@ -121,9 +156,10 @@ const TranslationPanel: FC<Props> = ({
                   ref={textareaRef}
                   className="translation-edit-area"
                   defaultValue={text}
+                  onChange={e => setEditingText(e.target.value)}
                   onKeyDown={handleKeyDown}
                   onBlur={commitEdit}
-                  rows={Math.max(2, text.split('\n').length)}
+                  rows={Math.max(5, editingText.split('\n').length)}
                   spellCheck={false}
                 />
               ) : text ? (
@@ -144,6 +180,18 @@ const TranslationPanel: FC<Props> = ({
           </div>
         )}
         <div className="translation-pad" />
+      </div>
+      {/* Vertical splitter — only when notes are open */}
+      {notesOpen && <div className="vsplitter" onMouseDown={handleVSplitterMouseDown} />}
+      {/* Notes section — collapses to header-only when folded */}
+      <div className={notesOpen ? 'notes-column' : 'notes-column notes-column--folded'}>
+        <NotesPanel
+          notes={notes}
+          activeChunkStart={activeChunkStart >= 0 ? activeChunkStart : 0}
+          onSetNotes={onSetNotes}
+          isOpen={notesOpen}
+          onToggle={() => setNotesOpen(o => !o)}
+        />
       </div>
     </div>
   );

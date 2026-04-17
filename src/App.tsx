@@ -43,11 +43,12 @@ function App() {
   // ── Lyriker sidecar (chunks, translations, notes) ────────────────────────
   // Wired here for M1.2+; destructure fields as milestones are built
   const lyriker = useLyriker(currentSong, dirHandle, lines);
-  const { chunks, toggleChunk, isStale, dismissStale, translations, setTranslation } = lyriker;
+  const { chunks, toggleChunk, isStale, dismissStale, translations, setTranslation, notes, setNotes } = lyriker;
 
   // ── Translation panel layout ─────────────────────────────
-  const [translationOpen, setTranslationOpen] = useState(false);
+  const [translationOpen, setTranslationOpen] = useState(true);
   const [leftPct, setLeftPct] = useState(55);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const columnsRef = useRef<HTMLDivElement>(null);
 
   const handleSplitterMouseDown = useCallback((e: React.MouseEvent) => {
@@ -129,10 +130,22 @@ function App() {
 
   return (
     <div className="app">
-      <aside className="sidebar">
-        <FolderPicker onPick={pickFolder} folderName={dirHandle?.name} />
-        <Playlist songs={songs} currentIndex={currentIndex} onSelect={selectSong} />
-      </aside>
+      {sidebarOpen ? (
+        <aside className="sidebar">
+          <FolderPicker onPick={pickFolder} folderName={dirHandle?.name} onHideSidebar={() => setSidebarOpen(false)} />
+          <Playlist songs={songs} currentIndex={currentIndex} onSelect={selectSong} />
+        </aside>
+      ) : (
+        <aside className="sidebar sidebar--folded">
+          <button
+            className="sidebar-fold-btn sidebar-fold-btn--show"
+            onClick={() => setSidebarOpen(true)}
+            title={t.showSidebar}
+          >
+            ›
+          </button>
+        </aside>
+      )}
       <main className="main">
         <div className="player-area">
           <div className="now-playing-row">
@@ -195,6 +208,7 @@ function App() {
                   lines={lines}
                   activeIndex={activeIndex}
                   hasLrc={hasLrc}
+                  isPlaying={audioState.isPlaying}
                   chunks={chunks}
                   onSeek={seek}
                   updateLine={updateLine}
@@ -213,10 +227,12 @@ function App() {
                 onToggle={() => setTranslationOpen(o => !o)}
                 chunks={chunks}
                 translations={translations}
+                notes={notes}
                 activeIndex={activeIndex}
                 lineCount={lines.length}
                 lines={lines}
                 onSetTranslation={setTranslation}
+                onSetNotes={setNotes}
               />
             </div>
           ) : (

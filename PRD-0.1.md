@@ -137,11 +137,9 @@ One file per song, stored in the same directory. Structure:
 - **On exit**: if playback has moved to a different chunk, show a **"Return to current playback"** button instead of auto-switching. Clicking it navigates to the now-active chunk's notes.
 - Changes auto-saved to JSON sidecar.
 
-### M3.4 — Notes entry from lyrics
+~~### M3.4 — Notes entry from lyrics~~
 
-- Each lyric chunk has a small **📝 button** in its gutter/header.
-- Clicking it: opens/expands the notes panel and enters edit mode for that chunk's notes.
-- If notes already exist for that chunk, it scrolls to and focuses the notes editor.
+> **Removed** — the double-click-to-edit pattern on the notes panel already provides frictionless entry without needing per-chunk gutter buttons in the lyric panel. The feature adds complexity with little practical gain.
 
 ---
 

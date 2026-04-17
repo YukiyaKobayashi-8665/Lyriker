@@ -5,6 +5,8 @@ export type T = {
   // FolderPicker
   openFolder: string;
   openMusicFolder: string;
+  showSidebar: string;
+  hideSidebar: string;
   // Playlist
   noSongs: string;
   openFolderToBegin: string;
@@ -70,6 +72,11 @@ export type T = {
   showTranslation: string;
   hideTranslation: string;
   noTranslation: string;
+  // Notes panel
+  notes: string;
+  showNotes: string;
+  hideNotes: string;
+  noNotes: string;
 };
 
 export const translations: Record<Lang, T> = {
@@ -77,6 +84,8 @@ export const translations: Record<Lang, T> = {
     switchLang: '中文',
     openFolder: 'Open Folder',
     openMusicFolder: 'Open music folder',
+    showSidebar: 'Show sidebar',
+    hideSidebar: 'Hide sidebar',
     noSongs: 'No songs found.',
     openFolderToBegin: 'Open a folder to begin.',
     lyricsAvailable: 'Lyrics available',
@@ -133,11 +142,17 @@ export const translations: Record<Lang, T> = {
     showTranslation: 'Show translation panel',
     hideTranslation: 'Hide translation panel',
     noTranslation: 'No translation yet. Double-click a chunk to add one.',
+    notes: 'Notes',
+    showNotes: 'Show notes',
+    hideNotes: 'Hide notes',
+    noNotes: 'No notes for this chunk. Double-click to add.',
   },
   zh: {
     switchLang: 'English',
     openFolder: '打开文件夹',
     openMusicFolder: '打开音乐文件夹',
+    showSidebar: '显示侧栏',
+    hideSidebar: '隐藏侧栏',
     noSongs: '未找到歌曲',
     openFolderToBegin: '请先打开一个文件夹',
     lyricsAvailable: '歌词可用',
@@ -194,5 +209,9 @@ export const translations: Record<Lang, T> = {
     showTranslation: '显示翻译面板',
     hideTranslation: '隐藏翻译面板',
     noTranslation: '还没有翻译。双击段落可添加。',
+    notes: '笔记',
+    showNotes: '显示笔记',
+    hideNotes: '隐藏笔记',
+    noNotes: '本段暂无笔记。双击可添加。',
   },
 };

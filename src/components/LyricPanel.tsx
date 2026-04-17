@@ -7,6 +7,7 @@ type Props = {
   lines: LyricLine[];
   activeIndex: number;
   hasLrc: boolean;
+  isPlaying: boolean;
   chunks?: number[];
   onSeek: (time: number) => void;
   updateLine: (index: number, text: string) => void;
@@ -29,7 +30,7 @@ function computeNearest(container: HTMLDivElement): number {
   return nearest;
 }
 
-const LyricPanel: FC<Props> = ({ lines, activeIndex, hasLrc, chunks, onSeek, updateLine, onEditingChange, onToggleChunk }) => {
+const LyricPanel: FC<Props> = ({ lines, activeIndex, hasLrc, isPlaying, chunks, onSeek, updateLine, onEditingChange, onToggleChunk }) => {
   const { t } = useLang();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [followMode, setFollowMode] = useState(true);
@@ -80,11 +81,14 @@ const LyricPanel: FC<Props> = ({ lines, activeIndex, hasLrc, chunks, onSeek, upd
     setFollowMode(false);
     setNearestIndex(computeNearest(container));
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-    resumeTimerRef.current = setTimeout(() => {
-      setFollowMode(true);
-      isUserScrolling.current = false;
-    }, FOLLOW_RESUME_DELAY);
-  }, []);
+    // Only schedule auto-resume when playing; while paused the user scrolls freely
+    if (isPlaying) {
+      resumeTimerRef.current = setTimeout(() => {
+        setFollowMode(true);
+        isUserScrolling.current = false;
+      }, FOLLOW_RESUME_DELAY);
+    }
+  }, [isPlaying]);
 
   const handleScroll = useCallback(() => {
     if (isUserScrolling.current && scrollRef.current) {
@@ -129,6 +133,18 @@ const LyricPanel: FC<Props> = ({ lines, activeIndex, hasLrc, chunks, onSeek, upd
     setEditingIndex(-1);
     setFollowMode(true);
   }, []);
+
+  // When playback resumes after being paused, restore follow mode
+  const prevIsPlayingRef = useRef(isPlaying);
+  useEffect(() => {
+    const wasPlaying = prevIsPlayingRef.current;
+    prevIsPlayingRef.current = isPlaying;
+    if (isPlaying && !wasPlaying && editingIndex < 0) {
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+      isUserScrolling.current = false;
+      setFollowMode(true);
+    }
+  }, [isPlaying, editingIndex]);
 
   useEffect(() => () => {
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
