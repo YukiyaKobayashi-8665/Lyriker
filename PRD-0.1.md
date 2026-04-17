@@ -149,7 +149,6 @@ One file per song, stored in the same directory. Structure:
 
 | Key | Context | Action |
 |-----|---------|--------|
-| `C` | Stamp mode | Mark chunk boundary |
 | `Ctrl+Enter` | Translation/notes edit | Save and exit edit mode |
 | `Escape` | Translation/notes edit | Save and exit edit mode |
 

@@ -12,7 +12,6 @@
   display: flex;
   flex-direction: column;
   background: #1a1a1a;
-  border-right: 1px solid #2a2a2a;
 }
 
 .sidebar--folded {
@@ -83,6 +82,20 @@
 }
 .lyric-splitter:hover,
 .lyric-splitter:active {
+  background: #4a9eff;
+}
+
+/* ── Sidebar horizontal splitter ────────────── */
+.sidebar-splitter {
+  width: 3px;
+  flex-shrink: 0;
+  background: #2a2a2a;
+  cursor: col-resize;
+  transition: background 0.15s;
+  z-index: 10;
+}
+.sidebar-splitter:hover,
+.sidebar-splitter:active {
   background: #4a9eff;
 }
 

@@ -2,6 +2,12 @@
 
 ---
 
+## v0.1.3.1 — Draggable sidebar splitter
+
+- **Draggable sidebar:** The divider between the sidebar and the main content area is now a draggable splitter. Drag it horizontally to resize the sidebar (150 – 500 px). Width snaps to 260 px on first load.
+
+---
+
 ## v0.1.3 — Notes panel, UX & bug fixes
 
 - **M3.1–M3.3 — Notes panel:** Notes section added below translations in the right column. Shows notes for the active chunk; auto-follows playback. Edit mode via double-click anywhere on the panel (rich text: Ctrl+B bold, Ctrl+I italic). Commit with Ctrl+Enter or Escape. While editing and playback moves on, a "Return to current playback" button appears.

@@ -49,7 +49,24 @@ function App() {
   const [translationOpen, setTranslationOpen] = useState(true);
   const [leftPct, setLeftPct] = useState(55);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(260);
   const columnsRef = useRef<HTMLDivElement>(null);
+
+  const handleSidebarSplitterMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startW = sidebarWidth;
+    const onMouseMove = (ev: MouseEvent) => {
+      const newW = Math.min(500, Math.max(150, startW + (ev.clientX - startX)));
+      setSidebarWidth(newW);
+    };
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }, [sidebarWidth]);
 
   const handleSplitterMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -131,7 +148,7 @@ function App() {
   return (
     <div className="app">
       {sidebarOpen ? (
-        <aside className="sidebar">
+        <aside className="sidebar" style={{ width: sidebarWidth }}>
           <FolderPicker onPick={pickFolder} folderName={dirHandle?.name} onHideSidebar={() => setSidebarOpen(false)} />
           <Playlist songs={songs} currentIndex={currentIndex} onSelect={selectSong} />
         </aside>
@@ -145,6 +162,9 @@ function App() {
             ›
           </button>
         </aside>
+      )}
+      {sidebarOpen && (
+        <div className="sidebar-splitter" onMouseDown={handleSidebarSplitterMouseDown} />
       )}
       <main className="main">
         <div className="player-area">
