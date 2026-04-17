@@ -28,6 +28,7 @@ type State = {
 
 type Action =
   | { type: 'INIT'; lrcLines: LyricLine[] }
+  | { type: 'INIT_FROM_RAW'; raw: string }
   | { type: 'INIT_EMPTY' }
   | { type: 'SET_RAW'; text: string }
   | { type: 'START_STAMPING' }
@@ -94,6 +95,9 @@ function reduce(state: State, action: Action): State {
         .join('\n');
       return { ...INITIAL, rawText };
     }
+
+    case 'INIT_FROM_RAW':
+      return { ...INITIAL, rawText: action.raw };
 
     case 'INIT_EMPTY':
       return { ...INITIAL };
@@ -208,6 +212,8 @@ export function useStampSession() {
 
     initFromExisting: useCallback(
       (lrcLines: LyricLine[]) => dispatch({ type: 'INIT', lrcLines }), []),
+    initFromRaw: useCallback(
+      (raw: string) => dispatch({ type: 'INIT_FROM_RAW', raw }), []),
     initEmpty: useCallback(
       () => dispatch({ type: 'INIT_EMPTY' }), []),
     setRawText: useCallback(

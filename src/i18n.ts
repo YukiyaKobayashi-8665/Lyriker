@@ -5,6 +5,8 @@ export type T = {
   // FolderPicker
   openFolder: string;
   openMusicFolder: string;
+  showSidebar: string;
+  hideSidebar: string;
   // Playlist
   noSongs: string;
   openFolderToBegin: string;
@@ -46,8 +48,6 @@ export type T = {
   pastePlaceholder: string;
   stampStatus: (stamped: number, total: number) => string;
   illegalBadge: (n: number) => string;
-  gapAfter: string;
-  gapAfterTitle: string;
   undo: string;
   undoTitle: string;
   save: string;
@@ -56,11 +56,27 @@ export type T = {
   saveTitle: string;
   stampHintClick: string;
   stampHintEnter: string;
-  stampHintG: string;
+  stampHintC: string;
   stampHintUndo: string;
   stampHintSave: string;
   usePlaybar: string;
   allStamped: string;
+  // Chunk boundaries
+  addChunkBoundary: string;
+  removeChunkBoundary: string;
+  // LRC staleness warning
+  lrcStaleWarning: string;
+  lrcStaleDismiss: string;
+  // Translation panel
+  translation: string;
+  showTranslation: string;
+  hideTranslation: string;
+  noTranslation: string;
+  // Notes panel
+  notes: string;
+  showNotes: string;
+  hideNotes: string;
+  noNotes: string;
 };
 
 export const translations: Record<Lang, T> = {
@@ -68,6 +84,8 @@ export const translations: Record<Lang, T> = {
     switchLang: '中文',
     openFolder: 'Open Folder',
     openMusicFolder: 'Open music folder',
+    showSidebar: 'Show sidebar',
+    hideSidebar: 'Hide sidebar',
     noSongs: 'No songs found.',
     openFolderToBegin: 'Open a folder to begin.',
     lyricsAvailable: 'Lyrics available',
@@ -103,8 +121,6 @@ export const translations: Record<Lang, T> = {
     pastePlaceholder: 'Paste lyrics here…',
     stampStatus: (s, t) => `${s} / ${t} stamped`,
     illegalBadge: (n) => `· ${n} illegal`,
-    gapAfter: '+ Gap after',
-    gapAfterTitle: 'Insert gap after playing line (G)',
     undo: '↩ Undo',
     undoTitle: 'Undo last stamp (Ctrl+Z)',
     save: '💾 Save',
@@ -113,16 +129,30 @@ export const translations: Record<Lang, T> = {
     saveTitle: 'Save (Ctrl+S)',
     stampHintClick: 'Click = stamp any line',
     stampHintEnter: '= stamp focused',
-    stampHintG: '= gap after',
+    stampHintC: '= toggle chunk boundary',
     stampHintUndo: '= undo',
     stampHintSave: '= save',
     usePlaybar: 'Use playbar to control playback',
     allStamped: 'All lines stamped — press Ctrl+S or click Save',
+    addChunkBoundary: 'Mark as chunk start',
+    removeChunkBoundary: 'Remove chunk boundary',
+    lrcStaleWarning: 'LRC file has been modified. Chunk boundaries may be misaligned.',
+    lrcStaleDismiss: 'Dismiss',
+    translation: 'Translation',
+    showTranslation: 'Show translation panel',
+    hideTranslation: 'Hide translation panel',
+    noTranslation: 'No translation yet. Double-click a chunk to add one.',
+    notes: 'Notes',
+    showNotes: 'Show notes',
+    hideNotes: 'Hide notes',
+    noNotes: 'No notes for this chunk. Double-click to add.',
   },
   zh: {
     switchLang: 'English',
     openFolder: '打开文件夹',
     openMusicFolder: '打开音乐文件夹',
+    showSidebar: '显示侧栏',
+    hideSidebar: '隐藏侧栏',
     noSongs: '未找到歌曲',
     openFolderToBegin: '请先打开一个文件夹',
     lyricsAvailable: '歌词可用',
@@ -158,8 +188,6 @@ export const translations: Record<Lang, T> = {
     pastePlaceholder: '在此粘贴歌词…',
     stampStatus: (s, total) => `已打 ${s} / ${total} 行`,
     illegalBadge: (n) => `· ${n} 个非法`,
-    gapAfter: '+ 空白行',
-    gapAfterTitle: '在当前播放行后插入空白行 (G)',
     undo: '↩ 撤销',
     undoTitle: '撤销上一个时间戳 (Ctrl+Z)',
     save: '💾 保存',
@@ -168,10 +196,22 @@ export const translations: Record<Lang, T> = {
     saveTitle: '保存 (Ctrl+S)',
     stampHintClick: '单击 = 给任意行打轴',
     stampHintEnter: '= 给焦点行打轴',
-    stampHintG: '= 插入空白',
+    stampHintC: '= 切换段落分界',
     stampHintUndo: '= 撤销',
     stampHintSave: '= 保存',
     usePlaybar: '播放进度由进度条控制',
     allStamped: '所有行已打轴 — 按 Ctrl+S 或点击保存',
+    addChunkBoundary: '设为段落开头',
+    removeChunkBoundary: '取消段落分界',
+    lrcStaleWarning: 'LRC 文件已被修改，段落分界可能错位。',
+    lrcStaleDismiss: '忽略',
+    translation: '翻译',
+    showTranslation: '显示翻译面板',
+    hideTranslation: '隐藏翻译面板',
+    noTranslation: '还没有翻译。双击段落可添加。',
+    notes: '笔记',
+    showNotes: '显示笔记',
+    hideNotes: '隐藏笔记',
+    noNotes: '本段暂无笔记。双击可添加。',
   },
 };

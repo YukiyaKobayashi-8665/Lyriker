@@ -13,12 +13,10 @@ async function scanFolder(handle: FileSystemDirectoryHandle): Promise<Song[]> {
     if (!AUDIO_EXTS.has(ext)) continue;
     const baseName = name.slice(0, name.lastIndexOf('.'));
     let lrcHandle: FileSystemFileHandle | null = null;
-    try {
-      lrcHandle = await handle.getFileHandle(`${baseName}.lrc`);
-    } catch {
-      // no sidecar
-    }
-    found.push({ name: baseName, file: entry as FileSystemFileHandle, lrcHandle });
+    let lyrikerHandle: FileSystemFileHandle | null = null;
+    try { lrcHandle = await handle.getFileHandle(`${baseName}.lrc`); } catch { /* no sidecar */ }
+    try { lyrikerHandle = await handle.getFileHandle(`${baseName}.lyriker.json`); } catch { /* no sidecar */ }
+    found.push({ name: baseName, file: entry as FileSystemFileHandle, lrcHandle, lyrikerHandle });
   }
   found.sort((a, b) => a.name.localeCompare(b.name));
   return found;
@@ -106,10 +104,15 @@ export function usePlaylist() {
     setSongs(prev => prev.map((s, i) => i === index ? { ...s, lrcHandle: handle } : s));
   }, []);
 
+  // Update the lyrikerHandle for a specific song after creating a new .lyriker.json
+  const attachLyrikerHandle = useCallback((index: number, handle: FileSystemFileHandle) => {
+    setSongs(prev => prev.map((s, i) => i === index ? { ...s, lyrikerHandle: handle } : s));
+  }, []);
+
   return {
     songs, currentIndex, dirHandle,
     pickFolder, goNext, goPrev, selectSong,
     restoredPosition, isRestoring, clearRestoring,
-    attachLrcHandle,
+    attachLrcHandle, attachLyrikerHandle,
   };
 }

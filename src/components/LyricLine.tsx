@@ -8,9 +8,12 @@ type Props = {
   isActive: boolean;
   isNearest: boolean;   // nearest line to panel center when not following
   isEditing: boolean;
+  isChunkStart?: boolean;
+  isInActiveChunk?: boolean;
   onSeek: (time: number) => void;
   onStartEdit: (index: number) => void;
   onSave: (index: number, text: string) => void;
+  onToggleChunk?: () => void;
 };
 
 export function safeHtml(text: string): string {
@@ -41,8 +44,8 @@ function htmlToLrcText(html: string): string {
 }
 
 const LyricLineComponent: FC<Props> = ({
-  line, index, isActive, isNearest, isEditing,
-  onSeek, onStartEdit, onSave,
+  line, index, isActive, isNearest, isEditing, isChunkStart, isInActiveChunk,
+  onSeek, onStartEdit, onSave, onToggleChunk,
 }) => {
   const { t } = useLang();
   const editRef = useRef<HTMLDivElement>(null);
@@ -91,9 +94,11 @@ const LyricLineComponent: FC<Props> = ({
 
   const classNames = [
     'lyric-line',
-    isActive   ? 'lyric-active'  : '',
-    isNearest  ? 'lyric-nearest' : '',
-    isEditing  ? 'lyric-editing' : '',
+    isActive        ? 'lyric-active'       : '',
+    isNearest       ? 'lyric-nearest'      : '',
+    isEditing       ? 'lyric-editing'      : '',
+    isChunkStart    ? 'lyric-chunk-start'  : '',
+    isInActiveChunk === false ? 'lyric-line--inactive' : '',
   ].filter(Boolean).join(' ');
 
   return (
@@ -104,6 +109,16 @@ const LyricLineComponent: FC<Props> = ({
       onDoubleClick={() => !isEditing && isActive && onStartEdit(index)}
       title={isEditing ? undefined : t.clickToSeek}
     >
+      {onToggleChunk && (
+        <button
+          className={`chunk-toggle-btn${isChunkStart ? ' chunk-toggle-btn--active' : ''}`}
+          title={isChunkStart ? t.removeChunkBoundary : t.addChunkBoundary}
+          onClick={e => { e.stopPropagation(); onToggleChunk(); }}
+          tabIndex={-1}
+        >
+          {isChunkStart ? '⊖' : '⊕'}
+        </button>
+      )}
       {isEditing ? (
         <div
           ref={editRef}
