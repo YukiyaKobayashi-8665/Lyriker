@@ -131,7 +131,7 @@ function App() {
 
   // ── Document title ─────────────────────────────────────
   useEffect(() => {
-    document.title = currentSong ? `${currentSong.name} — Simp Player` : 'Simp Player';
+    document.title = currentSong ? `${currentSong.name} — Lyriker` : 'Lyriker';
   }, [currentSong]);
 
   // Persist current position every 5 s while playing
